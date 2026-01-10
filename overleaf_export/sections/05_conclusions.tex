@@ -1,0 +1,44 @@
+\section{Conclusions}
+
+\subsection{Summary of Findings}
+
+1. \textbf{Median Filter is Optimal}: Across all test conditions with real medical images, the median filter significantly outperforms bilateral and guided filters, with improvements up to 131\%.
+
+2. \textbf{5×5 Kernel for Detail Preservation}: For clinical diagnosis where preserving anatomical detail is critical, the 5×5 median filter provides the best balance between noise reduction (PSNR 33.3 dB) and detail preservation.
+
+3. \textbf{15×15 Kernel for Robustness}: When dealing with heavy noise (0.8 probability), the 15×15 kernel provides better robustness, though at the cost of some detail loss.
+
+4. \textbf{K-Means for Segmentation}: Combined with median pre-filtering, K-Means clustering provides the most effective segmentation across different image types and noise levels.
+
+5. \textbf{Pre-filtering is Essential}: Segmentation quality dramatically improves with pre-filtering, with unfiltered noisy images producing unusable results.
+
+\subsection{Clinical Implications}
+
+For real medical image processing:
+
+\begin{enumerate}
+    \item \textbf{Standard Preprocessing}: Implement 5×5 median filtering as default preprocessing
+    \item \textbf{Adaptive Filtering}: Use 15×15 kernel only when noise level is confirmed above 0.5
+    \item \textbf{Multi-Method Validation}: Apply multiple segmentation methods and compare results
+    \item \textbf{Quality Assurance}: Always validate filtered and segmented images with original data
+    \item \textbf{Workflow}: Filter → Segment → Validate → Clinical Interpretation
+\end{enumerate}
+
+\subsection{Limitations and Future Work}
+
+\textbf{Limitations}:
+\begin{itemize}
+    \item Guided filter implementation limited by OpenCV capabilities
+    \item Uniform noise model may not reflect all real medical noise patterns
+    \item Segmentation evaluation is primarily qualitative
+    \item Limited to binary or low-order clustering
+\end{itemize}
+
+\textbf{Future Directions}:
+\begin{itemize}
+    \item Implement advanced filters (anisotropic diffusion, non-local means)
+    \item Evaluate on diverse medical imaging modalities (CT, MRI, ultrasound)
+    \item Develop quantitative segmentation metrics
+    \item Incorporate machine learning for adaptive filter parameter selection
+    \item Clinical validation with radiologists
+\end{itemize}

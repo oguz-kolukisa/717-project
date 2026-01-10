@@ -1,0 +1,138 @@
+\appendix
+
+\section{Implementation Code}
+
+\subsection{Filter Implementation}
+
+\begin{lstlisting}[language=Python]
+# Bilateral Filter
+def bilateral_filter(image, d=9, sigma_color=75, sigma_space=75):
+    return cv2.bilateralFilter(image.astype(np.uint8), 
+                              d, sigma_color, sigma_space)
+
+# Median Filter
+def median_filter_ep(image, kernel_size=5):
+    return cv2.medianBlur(image.astype(np.uint8), kernel_size)
+
+# Guided Filter
+def guided_filter(image, radius=8, eps=0.4):
+    # Implementation using image as guidance
+    return cv2.ximgproc.guidedFilter(image.astype(np.uint8), 
+                                     image.astype(np.uint8), 
+                                     radius, eps)
+\end{lstlisting}
+
+\subsection{Segmentation Implementation}
+
+\begin{lstlisting}[language=Python]
+# K-Means Clustering
+def kmeans_segmentation(image, n_clusters=2):
+    pixels = image.reshape(-1, 1).astype(np.float32)
+    criteria = (cv2.TERM_CRITERIA_EPS + 
+                cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2)
+    _, labels, centers = cv2.kmeans(pixels, n_clusters, None, 
+                                    criteria, 10, 
+                                    cv2.KMEANS_RANDOM_CENTERS)
+    centers = np.uint8(centers)
+    segmented = centers[labels.flatten()]
+    return segmented.reshape(image.shape)
+
+# Otsu's Thresholding
+def otsu_thresholding_segmentation(image):
+    _, segmented = cv2.threshold(image, 0, 255, 
+                                cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    return segmented
+
+# Split and Merge
+def split_merge_segmentation(image, depth=4):
+    def is_uniform(region, threshold=10):
+        return region.std() < threshold
+    
+    def split_merge_recursive(img, min_size=4):
+        if is_uniform(img) or img.shape[0] <= min_size:
+            return np.ones_like(img, dtype=np.uint8) * int(img.mean())
+        
+        h, w = img.shape
+        h2, w2 = h // 2, w // 2
+        
+        tl = split_merge_recursive(img[:h2, :w2], min_size)
+        tr = split_merge_recursive(img[:h2, w2:], min_size)
+        bl = split_merge_recursive(img[h2:, :w2], min_size)
+        br = split_merge_recursive(img[h2:, w2:], min_size)
+        
+        result = np.zeros_like(img, dtype=np.uint8)
+        result[:h2, :w2] = tl
+        result[:h2, w2:] = tr
+        result[h2:, :w2] = bl
+        result[h2:, w2:] = br
+        
+        return result
+    
+    return split_merge_recursive(image)
+\end{lstlisting}
+
+\subsection{Evaluation Metrics}
+
+\begin{lstlisting}[language=Python]
+# PSNR Calculation
+def compute_psnr(original, filtered):
+    mse = np.mean((original.astype(float) - 
+                  filtered.astype(float)) ** 2)
+    if mse == 0:
+        return float('inf')
+    max_val = 255.0
+    psnr = 20 * np.log10(max_val / np.sqrt(mse))
+    return psnr
+
+# SSIM Calculation
+def compute_ssim(original, filtered):
+    from skimage.metrics import structural_similarity as ssim
+    return ssim(original, filtered, data_range=255)
+\end{lstlisting}
+
+\section{Experimental Results Data}
+
+All experimental results (162 images) have been generated and saved:
+
+\begin{itemize}
+    \item \textbf{Step 1 Results}: 54 filtered images in \texttt{images/step1/}
+    \item \textbf{Step 2 Results}: 108 segmented images in \texttt{images/step2/}
+    \item \textbf{Naming Convention}: \texttt{\{image\}\_\{noise\}\_\{kernel\}\_\{method\}.png}
+\end{itemize}
+
+\section{Reproduction Instructions}
+
+\subsection{Environment Setup}
+
+\begin{lstlisting}[language=bash]
+# Create conda environment
+conda create -n 717-project python=3.11
+
+# Activate environment
+conda activate 717-project
+
+# Install dependencies
+pip install opencv-python scikit-image scikit-learn scipy matplotlib numpy
+\end{lstlisting}
+
+\subsection{Running the Experiments}
+
+\begin{lstlisting}[language=bash]
+# Extract medical images
+unrar x -o+ images.rar images/
+
+# Run all experiments
+python main.py
+\end{lstlisting}
+
+\section{Generated Images}
+
+The project generated 162 result images demonstrating:
+\begin{itemize}
+    \item Filter effectiveness across noise levels and kernel sizes
+    \item Segmentation quality with and without pre-filtering
+    \item Comparative performance of three segmentation methods
+    \item Impact of noise on medical image analysis
+\end{itemize}
+
+All images are saved with descriptive filenames enabling easy identification of experimental conditions and results.

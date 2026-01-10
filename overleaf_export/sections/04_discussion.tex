@@ -1,0 +1,120 @@
+\section{Discussion}
+
+\subsection{Key Findings}
+
+\subsubsection{Median Filter Superiority}
+
+The median filter consistently outperforms both bilateral and guided filters:
+
+\begin{equation}
+\text{Improvement}_{\text{median}} = \frac{\text{PSNR}_{\text{median}} - \text{PSNR}_{\text{bilateral}}}{\text{PSNR}_{\text{bilateral}}} \times 100\%
+\end{equation}
+
+For the medium detail image at 0.1 noise with 5×5 kernel:
+\begin{equation}
+\text{Improvement} = \frac{40.23 - 17.39}{17.39} \times 100\% = 131.3\%
+\end{equation}
+
+This exceptional performance is due to the median filter's ability to preserve edges while removing noise from the neighborhood.
+
+\subsubsection{Real Medical Image Characteristics}
+
+Real medical images exhibit different properties compared to synthetic images:
+
+\begin{enumerate}
+    \item \textbf{Resolution Variation}: Resolution ranges from 263×191 to 1433×1534 pixels
+    \item \textbf{Complex Anatomy}: High-detail images contain overlapping structures requiring careful processing
+    \item \textbf{Natural Noise Patterns}: Real medical noise differs from synthetic uniform noise
+    \item \textbf{Diagnostic Importance}: Fine details are critical for clinical interpretation
+\end{enumerate}
+
+\subsubsection{Noise Tolerance Analysis}
+
+\begin{table}[H]
+\centering
+\caption{Average PSNR Across All Images (Median Filter)}
+\begin{tabular}{cccc}
+\toprule
+\textbf{Noise Level} & \textbf{5×5 PSNR} & \textbf{15×15 PSNR} & \textbf{Diagnostic Quality} \\
+\midrule
+0.1 & 33.3 dB & 25.6 dB & Excellent \\
+0.5 & 20.2 dB & 21.4 dB & Moderate \\
+0.8 & 11.8 dB & 12.3 dB & Poor \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Segmentation Method Analysis}
+
+\subsubsection{K-Means Clustering}
+
+\textbf{Advantages}:
+\begin{itemize}
+    \item Fast computation and simple to implement
+    \item Effective tissue separation when intensities are well-separated
+    \item Flexible number of clusters for multi-tissue analysis
+\end{itemize}
+
+\textbf{Disadvantages}:
+\begin{itemize}
+    \item Sensitive to initialization (random restarts recommended)
+    \item Cannot handle variable-shaped clusters
+    \item Requires noise reduction for reliable results
+\end{itemize}
+
+\textbf{Clinical Application}: Tissue classification in well-controlled medical images (CT, MRI with preprocessing)
+
+\subsubsection{Split-and-Merge}
+
+\textbf{Advantages}:
+\begin{itemize}
+    \item Hierarchical approach naturally captures multi-scale structures
+    \item Adapts to local image characteristics
+    \item Good for complex anatomical regions
+\end{itemize}
+
+\textbf{Disadvantages}:
+\begin{itemize}
+    \item More computationally intensive
+    \item Block-like artifacts in results
+    \item Threshold-dependent uniformity criterion
+\end{itemize}
+
+\textbf{Clinical Application}: Hierarchical anatomical structure extraction
+
+\subsubsection{Otsu's Thresholding}
+
+\textbf{Advantages}:
+\begin{itemize}
+    \item Fully automatic, no parameter tuning
+    \item Fast execution
+    \item Optimal for bimodal distributions
+\end{itemize}
+
+\textbf{Disadvantages}:
+\begin{itemize}
+    \item Binary segmentation only
+    \item Assumes bimodal histogram
+    \item Cannot handle gradual intensity transitions
+\end{itemize}
+
+\textbf{Clinical Application}: Quick ROI (Region of Interest) detection and foreground/background separation
+
+\subsection{Optimal Configuration Recommendation}
+
+Based on comprehensive analysis:
+
+\begin{table}[H]
+\centering
+\caption{Recommended Configurations by Use Case}
+\begin{tabular}{lll}
+\toprule
+\textbf{Use Case} & \textbf{Filter Configuration} & \textbf{Segmentation Method} \\
+\midrule
+Clinical Diagnosis & 5×5 Median & K-Means (2-3 clusters) \\
+Research Analysis & 15×15 Median & Split-and-Merge \\
+Quick ROI Detection & 5×5 Median & Otsu Thresholding \\
+Noisy Data (>0.5) & 15×15 Median & K-Means \\
+\bottomrule
+\end{tabular}
+\end{table}
